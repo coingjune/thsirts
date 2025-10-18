@@ -1,22 +1,26 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# SQLite 데이터베이스 파일 경로
-SQLALCHEMY_DATABASE_URL = "sqlite:///./tshirts.db"
+# 환경변수에서 DATABASE_URL 가져오기
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# 데이터베이스 엔진 생성
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+if DATABASE_URL is None:
+    # 로컬 개발 환경
+    DATABASE_URL = "sqlite:///./tshirts.db"
+    engine = create_engine(
+        DATABASE_URL, connect_args={"check_same_thread": False}
+    )
+else:
+    # 프로덕션 환경 (PostgreSQL)
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    engine = create_engine(DATABASE_URL)
 
-# 세션 로컬 클래스 생성
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Base 클래스 생성
 Base = declarative_base()
 
-# 데이터베이스 세션 의존성
 def get_db():
     db = SessionLocal()
     try:
