@@ -1,0 +1,7 @@
+회원가입, 로그인,
+장바구니
+seller 등급
+주문관리
+
+현재 작업중:
+   db에 product에 category_main ,categroy_sub 추가함에 따라 FE 수정 중
