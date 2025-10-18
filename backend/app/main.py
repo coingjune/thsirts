@@ -20,7 +20,7 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 # CORS 설정 (프론트엔드와 통신 허용)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:5174"],
+    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:5174", "https://tshirts-shop.vercel.app/"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
