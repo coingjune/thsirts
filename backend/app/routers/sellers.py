@@ -1,19 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import List, Optional
-import shutil
-import os
-from pathlib import Path
+from datetime import datetime
+import cloudinary.uploader
 from .. import models, schemas
 from ..database import get_db
 from ..auth import get_current_user
-from datetime import datetime
 
 router = APIRouter(prefix="/api/sellers", tags=["sellers"])
-
-# 이미지 저장 경로
-UPLOAD_DIR = Path("uploads/qr_codes")
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 @router.get("/", response_model=List[schemas.SellerResponse])
 async def get_sellers(db: Session = Depends(get_db)):
@@ -35,8 +29,6 @@ async def get_my_seller(
         raise HTTPException(status_code=404, detail="판매자 정보가 없습니다")
     
     return seller
-
-import cloudinary.uploader
 
 @router.post("/", response_model=schemas.SellerResponse)
 async def create_seller(
@@ -60,7 +52,7 @@ async def create_seller(
         try:
             result = cloudinary.uploader.upload(
                 qr_image.file,
-                folder=f"tshirts/qr_codes",
+                folder="tshirts/qr_codes",
                 public_id=f"seller_{current_user.id}_qr_{int(datetime.utcnow().timestamp())}",
                 resource_type="auto"
             )
@@ -92,7 +84,7 @@ async def update_my_seller(
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """내 판매자 정보 수정"""
+    """내 판매자 정보 수정 - Cloudinary 사용"""
     seller = db.query(models.Seller).filter(
         models.Seller.user_id == current_user.id
     ).first()
@@ -100,17 +92,22 @@ async def update_my_seller(
     if not seller:
         raise HTTPException(status_code=404, detail="판매자 정보가 없습니다")
     
-    # QR 이미지 업데이트
+    # QR 이미지 Cloudinary에 업로드
     if qr_image and qr_image.filename:
-        # 기존 이미지 삭제 (선택사항)
-        file_extension = os.path.splitext(qr_image.filename)[1]
-        filename = f"seller_{current_user.id}_{int(datetime.utcnow().timestamp())}{file_extension}"
-        file_path = UPLOAD_DIR / filename
-        
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(qr_image.file, buffer)
-        
-        seller.kakaopay_qr_url = f"/uploads/qr_codes/{filename}"
+        try:
+            await qr_image.seek(0)  # 파일 포인터 초기화
+            
+            result = cloudinary.uploader.upload(
+                qr_image.file,
+                folder="tshirts/qr_codes",
+                public_id=f"seller_{current_user.id}_qr_{int(datetime.utcnow().timestamp())}",
+                resource_type="auto"
+            )
+            
+            seller.kakaopay_qr_url = result['secure_url']
+            
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"QR 이미지 업로드 실패: {str(e)}")
     
     # 정보 업데이트
     seller.name = name
