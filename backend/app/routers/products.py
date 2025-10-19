@@ -1,19 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from datetime import datetime
+import cloudinary.uploader
+import json
 from .. import models, schemas
 from ..database import get_db
 from ..auth import get_current_user
-from pathlib import Path
-import shutil
-import os
-from datetime import datetime
 
 router = APIRouter(prefix="/api/products", tags=["products"])
-
-# 이미지 저장 경로
-UPLOAD_DIR = Path("uploads/products")
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 @router.get("/categories", response_model=dict)
 async def get_categories():
@@ -40,16 +35,14 @@ async def get_my_products(
     
     products = db.query(models.Product).filter(
         models.Product.seller_id == seller.id,
-        #models.Product.is_active == 1  # 활성 상품만
     ).all()
     
     return products
 
-
-#전체상품조회
 @router.get("/", response_model=List[schemas.ProductResponse])
 async def get_products(db: Session = Depends(get_db)):
-    products = db.query(models.Product).filter(models.Product.is_active == 1).all()  # 활성 상품만
+    """전체 상품 조회"""
+    products = db.query(models.Product).filter(models.Product.is_active == 1).all()
     return products
 
 @router.get("/{product_id}", response_model=schemas.ProductResponse)
@@ -70,7 +63,7 @@ async def create_product(
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """상품 등록 (판매자만 가능)"""
+    """상품 등록 (판매자만 가능) - Cloudinary"""
     seller = db.query(models.Seller).filter(
         models.Seller.user_id == current_user.id
     ).first()
@@ -87,20 +80,26 @@ async def create_product(
     # 타임스탬프 한 번만 생성
     timestamp = int(datetime.utcnow().timestamp())
     
-    # 모든 이미지를 먼저 저장
+    # Cloudinary에 이미지 업로드
     saved_image_urls = []
-    for idx, image in enumerate(images):
-        file_extension = os.path.splitext(image.filename)[1]
-        filename = f"product_{seller.id}_{timestamp}_{idx}{file_extension}"
-        file_path = UPLOAD_DIR / filename
-        
-        # 파일 포인터를 처음으로 되돌림
-        await image.seek(0)
-        
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(image.file, buffer)
-        
-        saved_image_urls.append(f"/uploads/products/{filename}")
+    try:
+        for idx, image in enumerate(images):
+            # 파일 포인터를 처음으로 되돌림
+            await image.seek(0)
+            
+            # Cloudinary에 업로드
+            result = cloudinary.uploader.upload(
+                image.file,
+                folder=f"tshirts/products/seller_{seller.id}",
+                public_id=f"product_{timestamp}_{idx}",
+                resource_type="auto"
+            )
+            
+            # Cloudinary URL 저장
+            saved_image_urls.append(result['secure_url'])
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"이미지 업로드 실패: {str(e)}")
     
     # 첫 번째 이미지를 메인 이미지로
     main_image_url = saved_image_urls[0]
@@ -132,7 +131,6 @@ async def create_product(
     db.refresh(new_product)
     return new_product
 
-
 @router.put("/{product_id}", response_model=schemas.ProductResponse)
 async def update_product(
     product_id: int,
@@ -142,11 +140,11 @@ async def update_product(
     category_main: str = Form("미분류"),
     category_sub: Optional[str] = Form(None),
     images: Optional[List[UploadFile]] = File(None),
-    slot_info: Optional[str] = Form(None),  # 슬롯 정보 (JSON)
+    slot_info: Optional[str] = Form(None),
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """상품 수정 (본인 상품만)"""
+    """상품 수정 (본인 상품만) - Cloudinary"""
     seller = db.query(models.Seller).filter(
         models.Seller.user_id == current_user.id
     ).first()
@@ -164,8 +162,6 @@ async def update_product(
     
     # 슬롯 정보가 있는 경우 (수정 모드)
     if slot_info:
-        import json
-        
         try:
             slots = json.loads(slot_info)
         except:
@@ -179,20 +175,25 @@ async def update_product(
         # 타임스탬프 생성
         timestamp = int(datetime.utcnow().timestamp())
         
-        # 새 파일들을 먼저 저장
+        # 새 파일들을 Cloudinary에 업로드
         new_image_urls = []
         if images and len(images) > 0 and images[0].filename:
-            for idx, image in enumerate(images):
-                file_extension = os.path.splitext(image.filename)[1]
-                filename = f"product_{seller.id}_{timestamp}_{idx}{file_extension}"
-                file_path = UPLOAD_DIR / filename
-                
-                await image.seek(0)
-                
-                with open(file_path, "wb") as buffer:
-                    shutil.copyfileobj(image.file, buffer)
-                
-                new_image_urls.append(f"/uploads/products/{filename}")
+            try:
+                for idx, image in enumerate(images):
+                    await image.seek(0)
+                    
+                    # Cloudinary에 업로드
+                    result = cloudinary.uploader.upload(
+                        image.file,
+                        folder=f"tshirts/products/seller_{seller.id}",
+                        public_id=f"product_{product_id}_{timestamp}_{idx}",
+                        resource_type="auto"
+                    )
+                    
+                    new_image_urls.append(result['secure_url'])
+                    
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"이미지 업로드 실패: {str(e)}")
         
         # 슬롯 순서대로 최종 이미지 리스트 구성
         final_image_urls = []
@@ -255,9 +256,7 @@ async def delete_product(
     if not product:
         raise HTTPException(status_code=404, detail="상품을 찾을 수 없거나 권한이 없습니다")
     
-    #db.delete(product) DB에서 삭제하는 코드
-    product.is_active = 0 #DB에서 유지, 대신 비활성화 처리
+    # DB에서 유지, 대신 비활성화 처리
+    product.is_active = 0
     db.commit()
     return {"message": "상품이 삭제되었습니다"}
-
-

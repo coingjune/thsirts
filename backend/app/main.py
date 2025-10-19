@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from .database import engine, Base
 from .routers import auth, products, cart, orders, sellers
+from . import config
 
 # 데이터베이스 테이블 생성
 Base.metadata.create_all(bind=engine)

@@ -36,6 +36,8 @@ async def get_my_seller(
     
     return seller
 
+import cloudinary.uploader
+
 @router.post("/", response_model=schemas.SellerResponse)
 async def create_seller(
     name: str = Form(...),
@@ -44,8 +46,7 @@ async def create_seller(
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """판매자 등록"""
-    # 이미 판매자인지 확인
+    """판매자 등록 - Cloudinary 사용"""
     existing_seller = db.query(models.Seller).filter(
         models.Seller.user_id == current_user.id
     ).first()
@@ -53,17 +54,19 @@ async def create_seller(
     if existing_seller:
         raise HTTPException(status_code=400, detail="이미 판매자로 등록되어 있습니다")
     
-    # QR 이미지 저장
+    # QR 이미지 Cloudinary에 업로드
     qr_url = None
     if qr_image and qr_image.filename:
-        file_extension = os.path.splitext(qr_image.filename)[1]
-        filename = f"seller_{current_user.id}_{int(datetime.utcnow().timestamp())}{file_extension}"
-        file_path = UPLOAD_DIR / filename
-        
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(qr_image.file, buffer)
-        
-        qr_url = f"/uploads/qr_codes/{filename}"
+        try:
+            result = cloudinary.uploader.upload(
+                qr_image.file,
+                folder=f"tshirts/qr_codes",
+                public_id=f"seller_{current_user.id}_qr_{int(datetime.utcnow().timestamp())}",
+                resource_type="auto"
+            )
+            qr_url = result['secure_url']
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"QR 이미지 업로드 실패: {str(e)}")
     
     # 판매자 생성
     new_seller = models.Seller(
@@ -74,8 +77,6 @@ async def create_seller(
     )
     
     db.add(new_seller)
-    
-    # 사용자를 판매자로 업데이트
     current_user.is_seller = 1
     
     db.commit()
