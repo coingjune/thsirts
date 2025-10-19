@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from .database import engine, Base
 from .routers import auth, products, cart, orders, sellers
+from datetime import datetime
 from . import config
 
 # 데이터베이스 테이블 생성
@@ -37,3 +38,12 @@ app.include_router(sellers.router)
 @app.get("/")
 async def root():
     return {"message": "T-Shirts API is running!"}
+
+# ✅ Health Check 엔드포인트 추가
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "ok",
+        "timestamp": datetime.utcnow().isoformat(),
+        "service": "T-Shirts API"
+    }
