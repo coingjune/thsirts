@@ -285,12 +285,19 @@ const SellerDashboardPage: React.FC<SellerDashboardPageProps> = ({ setRoute }) =
         setDescription(product.description);
         setImageUrl(product.image_url);
         
-        // 기존 이미지들을 미리보기로 표시
+        // ✅ 기존 이미지들을 미리보기로 표시 (조건부 체크 추가)
         if (product.images && product.images.length > 0) {
-            const previews = product.images.map(img => `${API_BASE_URL}${img.image_url}`);
+            const previews = product.images.map(img => 
+                img.image_url.startsWith('http') 
+                    ? img.image_url 
+                    : `${API_BASE_URL}${img.image_url}`
+            );
             setImagePreviews(previews);
         } else {
-            setImagePreviews([`${API_BASE_URL}${product.image_url}`]);
+            const mainImage = product.image_url.startsWith('http')
+                ? product.image_url
+                : `${API_BASE_URL}${product.image_url}`;
+            setImagePreviews([mainImage]);
         }
         setImageFiles([]);
         
@@ -306,11 +313,19 @@ const SellerDashboardPage: React.FC<SellerDashboardPageProps> = ({ setRoute }) =
         setDescription(product.description);
         setImageUrl(product.image_url);
         
+        // ✅ 조건부 체크 추가
         if (product.images && product.images.length > 0) {
-            const previews = product.images.map(img => `${API_BASE_URL}${img.image_url}`);
+            const previews = product.images.map(img => 
+                img.image_url.startsWith('http') 
+                    ? img.image_url 
+                    : `${API_BASE_URL}${img.image_url}`
+            );
             setImagePreviews(previews);
         } else {
-            setImagePreviews([`${API_BASE_URL}${product.image_url}`]);
+            const mainImage = product.image_url.startsWith('http')
+                ? product.image_url
+                : `${API_BASE_URL}${product.image_url}`;
+            setImagePreviews([mainImage]);
         }
         setImageFiles([]);
         
