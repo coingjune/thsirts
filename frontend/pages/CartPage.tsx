@@ -215,7 +215,10 @@ const CartPage: React.FC<CartPageProps> = ({ setRoute, onCartUpdate }) => {
                                 className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500"
                             />
                             <img 
-                                src={item.product.image_url} 
+                                src={item.product.image_url.startsWith('http') 
+                                    ? item.product.image_url 
+                                    : `${API_BASE_URL}${item.product.image_url}`
+                                }
                                 alt={item.product.name}
                                 className="w-24 h-24 object-cover rounded-md"
                             />
