@@ -768,7 +768,10 @@ const SellerDashboardPage: React.FC<SellerDashboardPageProps> = ({ setRoute }) =
                                                             {order.order_items.map((item, idx) => (
                                                                 <div key={idx} className="flex items-center gap-4">
                                                                     <img
-                                                                        src={item.product.image_url}
+                                                                        src={item.product.image_url.startsWith('http') 
+                                                                            ? item.product.image_url 
+                                                                            : `${API_BASE_URL}${item.product.image_url}`
+                                                                        }
                                                                         alt={item.product.name}
                                                                         className="w-16 h-16 object-cover rounded"
                                                                     />

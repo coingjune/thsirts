@@ -254,7 +254,10 @@ const MyPage: React.FC<MyPageProps> = ({ setRoute, currentUser }) => {
                                         <div className="md:col-span-2">
                                             <p className="text-sm text-gray-600 mb-2">카카오페이 QR 코드</p>
                                             <img 
-                                                src={`${API_BASE_URL}${seller.kakaopay_qr_url}`} 
+                                                src={seller.kakaopay_qr_url.startsWith('http')
+                                                    ? seller.kakaopay_qr_url
+                                                    : `${API_BASE_URL}${seller.kakaopay_qr_url}`
+                                                }
                                                 alt="카카오페이 QR"
                                                 className="w-48 h-48 object-contain border rounded-md"
                                             />
@@ -577,7 +580,10 @@ const SellerEditModal: React.FC<{
                                 <div className="mb-4">
                                     <p className="text-sm text-gray-600 mb-2">현재 QR 코드:</p>
                                     <img 
-                                        src={`${API_BASE_URL}${seller.kakaopay_qr_url}`} 
+                                        src={seller.kakaopay_qr_url.startsWith('http')
+                                            ? seller.kakaopay_qr_url
+                                            : `${API_BASE_URL}${seller.kakaopay_qr_url}`
+                                        }
                                         alt="현재 QR"
                                         className="w-32 h-32 object-contain border rounded-md"
                                     />

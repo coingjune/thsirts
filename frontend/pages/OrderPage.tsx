@@ -274,7 +274,10 @@ const OrderPage: React.FC<OrderPageProps> = ({ setRoute, onCartUpdate}) => {
                                 <div className="flex flex-col items-center gap-4">
                                     {seller.kakaopay_qr_url ? (
                                         <img 
-                                            src={`${API_BASE_URL}${seller.kakaopay_qr_url}`}
+                                            src={seller.kakaopay_qr_url.startsWith('http')
+                                                ? seller.kakaopay_qr_url
+                                                : `${API_BASE_URL}${seller.kakaopay_qr_url}`
+                                            }
                                             alt="카카오페이 QR"
                                             className="w-48 h-48 object-contain border rounded-md"
                                         />
