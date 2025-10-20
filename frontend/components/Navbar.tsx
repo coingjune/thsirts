@@ -27,7 +27,7 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center">
                         <a href="#home" onClick={(e) => handleNavigation(e, 'home')} className="text-2xl font-bold text-gray-900 tracking-tight">
-                            T-Style
+                            Whale.June Studio
                         </a>
                     </div>
                     <div className="flex items-center">
