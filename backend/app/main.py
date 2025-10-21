@@ -39,8 +39,8 @@ app.include_router(sellers.router)
 async def root():
     return {"message": "T-Shirts API is running!"}
 
-# ✅ Health Check 엔드포인트 추가
-@app.get("/health")
+# ✅ GET과 HEAD 둘 다 허용
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health_check():
     return {
         "status": "ok",
