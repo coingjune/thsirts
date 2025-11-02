@@ -7,16 +7,33 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from .database import get_db
 from . import models
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # 비밀번호 해싱 설정
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
+
+# ✅ 환경변수로 JWT 설정 값 가져오기
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY 환경변수가 설정되지 않았습니다.")
+
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+
+security = HTTPBearer()
+
+"""
 # JWT 설정
 SECRET_KEY = "your-secret-key-change-this-in-production"  # 실제 운영에서는 환경변수로 관리
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 security = HTTPBearer()
+"""
 
 # 비밀번호 해싱
 def hash_password(password: str) -> str:
