@@ -160,7 +160,7 @@ async def update_product(
     if not existing_product:
         raise HTTPException(status_code=404, detail="상품을 찾을 수 없거나 권한이 없습니다")
     
-    # 슬롯 정보가 있는 경우 (수정 모드)
+# 슬롯 정보가 있는 경우 (수정 모드)
     if slot_info:
         try:
             slots = json.loads(slot_info)
@@ -182,7 +182,6 @@ async def update_product(
                 for idx, image in enumerate(images):
                     await image.seek(0)
                     
-                    # Cloudinary에 업로드
                     result = cloudinary.uploader.upload(
                         image.file,
                         folder=f"tshirts/products/seller_{seller.id}",
@@ -207,7 +206,8 @@ async def update_product(
                     new_file_counter += 1
             else:
                 # 기존 이미지 유지
-                final_image_urls.append(slot['url'])
+                if slot['url']:
+                    final_image_urls.append(slot['url'])
         
         if len(final_image_urls) > 0:
             # 첫 번째 이미지를 메인으로

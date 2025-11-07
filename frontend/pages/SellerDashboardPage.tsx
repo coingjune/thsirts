@@ -183,33 +183,37 @@ const SellerDashboardPage: React.FC<SellerDashboardPageProps> = ({ setRoute }) =
             
             if (editingProduct) {
                 // 수정 모드: 슬롯 순서대로 처리
-                const keepUrls: string[] = [];
-                const newFileIndices: number[] = [];
-                
-                imagePreviews.forEach((preview, index) => {
-                    if (imageFiles[index]) {
-                        // 새 파일이 있는 슬롯
-                        newFileIndices.push(index);
-                    } else if (preview.startsWith(API_BASE_URL)) {
-                        // 기존 이미지 유지
-                        keepUrls.push(preview.replace(API_BASE_URL, ''));
+                const slotInfo = imagePreviews.map((preview, index) => {
+                    const hasNewFile = imageFiles[index] instanceof File;
+                    let cleanUrl = null;
+                    
+                    if (!hasNewFile) {
+                        // 기존 이미지 URL 정리
+                        if (preview.startsWith('http')) {
+                            // Cloudinary URL인 경우 전체 URL 유지
+                            cleanUrl = preview;
+                        } else if (preview.startsWith(API_BASE_URL)) {
+                            // API_BASE_URL이 포함된 경우 제거
+                            cleanUrl = preview.replace(API_BASE_URL, '');
+                        } else {
+                            // 상대 경로인 경우 그대로 유지
+                            cleanUrl = preview;
+                        }
                     }
+                    
+                    return {
+                        index: index,
+                        isNew: hasNewFile,
+                        url: cleanUrl
+                    };
                 });
-                
-                // 슬롯 순서 정보 전송
-                const slotInfo = imagePreviews.map((preview, index) => ({
-                    index: index,
-                    isNew: !!imageFiles[index],
-                    url: imageFiles[index] ? null : (preview.startsWith(API_BASE_URL) ? preview.replace(API_BASE_URL, '') : null)
-                })).filter(item => item.url !== null || item.isNew);
                 
                 formData.append('slot_info', JSON.stringify(slotInfo));
                 
                 // 새 파일들을 순서대로 추가
-                newFileIndices.forEach(slotIndex => {
-                    const file = imageFiles[slotIndex];
-                    if (file) {
-                        formData.append('images', file);
+                imagePreviews.forEach((preview, index) => {
+                    if (imageFiles[index] instanceof File) {
+                        formData.append('images', imageFiles[index]);
                     }
                 });
             } else {
@@ -285,20 +289,17 @@ const SellerDashboardPage: React.FC<SellerDashboardPageProps> = ({ setRoute }) =
         setDescription(product.description);
         setImageUrl(product.image_url);
         
-        // ✅ 기존 이미지들을 미리보기로 표시 (조건부 체크 추가)
+        // ✅ 기존 이미지들을 미리보기로 표시
         if (product.images && product.images.length > 0) {
-            const previews = product.images.map(img => 
-                img.image_url.startsWith('http') 
-                    ? img.image_url 
-                    : `${API_BASE_URL}${img.image_url}`
-            );
+            // Cloudinary URL은 그대로 유지
+            const previews = product.images.map(img => img.image_url);
             setImagePreviews(previews);
         } else {
-            const mainImage = product.image_url.startsWith('http')
-                ? product.image_url
-                : `${API_BASE_URL}${product.image_url}`;
-            setImagePreviews([mainImage]);
+            // images 배열이 없으면 메인 이미지만 사용
+            setImagePreviews([product.image_url]);
         }
+        
+        // 새 파일 배열 초기화 (기존 이미지는 File이 아니므로 빈 배열로)
         setImageFiles([]);
         
         setCategoryMain(product.category_main);
@@ -313,19 +314,12 @@ const SellerDashboardPage: React.FC<SellerDashboardPageProps> = ({ setRoute }) =
         setDescription(product.description);
         setImageUrl(product.image_url);
         
-        // ✅ 조건부 체크 추가
+        // ✅ 기존 이미지들을 미리보기로 표시
         if (product.images && product.images.length > 0) {
-            const previews = product.images.map(img => 
-                img.image_url.startsWith('http') 
-                    ? img.image_url 
-                    : `${API_BASE_URL}${img.image_url}`
-            );
+            const previews = product.images.map(img => img.image_url);
             setImagePreviews(previews);
         } else {
-            const mainImage = product.image_url.startsWith('http')
-                ? product.image_url
-                : `${API_BASE_URL}${product.image_url}`;
-            setImagePreviews([mainImage]);
+            setImagePreviews([product.image_url]);
         }
         setImageFiles([]);
         
