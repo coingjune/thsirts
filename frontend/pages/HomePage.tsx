@@ -5,7 +5,7 @@ interface HomePageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({ setRoute }) => (
-    <div className="relative h-[calc(100vh-4rem)] bg-cover bg-center" style={{ backgroundImage: "url('https://picsum.photos/seed/hero/1600/900')" }}>
+    <div className="relative h-[calc(100vh-4rem)] bg-cover bg-center" style={{ backgroundImage: "url('/mainbackground.png')" }}>
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
         <div className="relative z-10 flex flex-col justify-center items-center h-full text-center text-white px-4">
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">당신만의 스타일을 표현하세요</h1>
