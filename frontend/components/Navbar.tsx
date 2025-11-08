@@ -179,14 +179,14 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                             onClick={(e) => handleNavigation(e, 'home')}
                             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                         >
-                            🏠 메인
+                            메인
                         </a>
                         <a
                             href="#products"
                             onClick={(e) => handleNavigation(e, 'products')}
                             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                         >
-                            👕 제품
+                            제품
                         </a>
 
                         {currentUser ? (
@@ -203,7 +203,7 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                                     onClick={(e) => handleNavigation(e, 'cart')}
                                     className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                                 >
-                                    🛒 장바구니 {cartItemCount > 0 && (
+                                    장바구니 {cartItemCount > 0 && (
                                         <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full ml-2">
                                             {cartItemCount}
                                         </span>
@@ -213,7 +213,7 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                                     onClick={handleLogout}
                                     className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                                 >
-                                    🚪 로그아웃
+                                    로그아웃
                                 </button>
                             </>
                         ) : (
@@ -225,7 +225,7 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                                     }}
                                     className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                                 >
-                                    🔑 로그인
+                                    로그인
                                 </button>
                                 <button
                                     onClick={() => {
@@ -234,7 +234,7 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                                     }}
                                     className="block w-full text-left px-3 py-2 rounded-md text-base font-medium bg-indigo-600 text-white hover:bg-indigo-700"
                                 >
-                                    ✨ 회원가입
+                                    회원가입
                                 </button>
                             </>
                         )}

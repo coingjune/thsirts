@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>링크로스2조-AI활용 프로젝트</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            line-height: 1.8;
+            color: #1f2937;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+            font-weight: 800;
+        }
+
+        .header .subtitle {
+            font-size: 20px;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        .header .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            margin-top: 20px;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+        }
+
+        .content {
+            padding: 50px 40px;
+        }
+
+        .intro {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+            border-left: 5px solid #667eea;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+        }
+
+        .intro h2 {
+            color: #4f46e5;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .intro p {
+            font-size: 16px;
+            color: #4b5563;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 28px;
+            color: #1f2937;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title .icon {
+            font-size: 32px;
+        }
+
+        .ai-tool {
+            background: #ffffff;
+            border: 2px solid #e5e7eb;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-tool:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+
+        .ai-tool::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .ai-tool-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .ai-tool-icon {
+            font-size: 48px;
+        }
+
+        .ai-tool-title {
+            flex: 1;
+        }
+
+        .ai-tool-title h3 {
+            font-size: 24px;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .ai-tool-title .tech {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .rating {
+            display: flex;
+            gap: 3px;
+            font-size: 20px;
+        }
+
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .pros, .cons {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .pros h4, .cons h4 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pros h4 {
+            color: #059669;
+        }
+
+        .cons h4 {
+            color: #dc2626;
+        }
+
+        .pros ul, .cons ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .pros li, .cons li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            font-size: 14px;
+            color: #4b5563;
+        }
+
+        .pros li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #059669;
+            font-weight: bold;
+        }
+
+        .cons li:before {
+            content: "!";
+            position: absolute;
+            left: 0;
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .use-case {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .use-case strong {
+            color: #92400e;
+        }
+
+        .tips {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 15px;
+            padding: 35px;
+            margin-top: 30px;
+        }
+
+        .tips h3 {
+            color: #92400e;
+            font-size: 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tip-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .tip-item h4 {
+            color: #1f2937;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .tip-item p {
+            color: #4b5563;
+            font-size: 15px;
+        }
+
+        .workflow {
+            background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%);
+            border-radius: 15px;
+            padding: 35px;
+            margin-top: 30px;
+        }
+
+        .workflow h3 {
+            color: #4c1d95;
+            font-size: 24px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .workflow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .workflow-step {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .step-content h4 {
+            color: #1f2937;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        .step-content p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .code-block {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .footer {
+            background: #f9fafb;
+            padding: 40px;
+            text-align: center;
+            border-top: 3px solid #e5e7eb;
+        }
+
+        .footer p {
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        .footer .links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .footer .links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .footer .links a:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .content {
+                padding: 30px 20px;
+            }
+
+            .pros-cons {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-table {
+                font-size: 12px;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <h1>🚀 AI를 활용한 사업 추진 프로젝트 </h1>
+            <p class="subtitle">코딩, 이미지와 영상 생성, 브랜드 기획까지 All-in-One</p>
+            <div class="badge">💡AI 활용과 직무 경험까지 한번에 잡다</div>
+        </div>
+
+        <!-- 메인 컨텐츠 -->
+        <div class="content">
+            <!-- 인트로 -->
+            <div class="intro">
+                <h2>📖 프로젝트 방향성</h2>
+                <p>
+                    ✅ 요즘 AI가 핫 하니까 <strong>AI 스터디 프로젝트를 해볼까?</strong><br>
+                    ✅ 막연히 공부하려하면 지루하니 <strong>서비스 출시를 해보자!</strong><br>
+                    ✅ 구체적인 동기부여를 위해 <strong>수익화까지 도전</strong><br>
+                    ✅ 티셔츠 판매사업을 하며 <strong>브랜드 기획, 디자인, 마케팅, 웹앱 개발에 AI를 활용하기!</strong>
+                </p>
+            </div>
+
+            <!-- 프로젝트 결과 -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="icon">🎯</span>
+                    AI활용 실적 #1. 바이브 코딩으로 웹사이트 출시
+                </h2>
+                <div class="ai-tool">
+                    <div class="ai-tool-header">
+                        <span class="ai-tool-icon">👕</span>
+                        <div class="ai-tool-title">
+                            <h3>T-Shirts E-Commerce Platform</h3>
+                            <p class="tech">React + TypeScript | FastAPI + Python | PostgreSQL</p>
+                        </div>
+                    </div>
+                    <p style="color: #4b5563; margin-bottom: 15px;">
+                        커스텀 티셔츠 판매를 위한 완전한 이커머스 플랫폼. 
+                        회원가입, 로그인, 장바구니, 주문, 판매자 대시보드까지 모든 기능 구현.
+                    </p>
+                    <div class="use-case">
+                        <strong>💎 성과:</strong> 개발 기간 약 2주, 완전히 작동하는 서비스 배포 완료!<br>
+                        <strong>🌐 Live Demo:</strong> <a href="https://tshirts-shop.vercel.app" target="_blank" style="color: #667eea;">https://tshirts-shop.vercel.app</a>
+                    </div>
+                    <img src="website_qr.png" alt="QR Code" style="display: block; margin: 0 auto;">
+                </div>
+            </div>
+
+            <!-- AI 도구 상세 설명 -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="icon">🤖</span>
+                    AI 도구 완벽 활용법
+                </h2>
+
+                <!-- Google AI Studio -->
+                <div class="ai-tool">
+                    <div class="ai-tool-header">
+                        <span class="ai-tool-icon">🎨</span>
+                        <div class="ai-tool-title">
+                            <h3>Google AI Studio</h3>
+                            <p class="tech">프론트엔드 개발 최적화 | 프로젝트 초기 세팅</p>
+                        </div>
+                        <div class="rating">⭐⭐⭐⭐⭐</div>
+                    </div>
+
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h4>✅ 장점</h4>
+                            <ul>
+                                <li>프론트엔드 코드 생성 능력 탁월</li>
+                                <li>폴더 구조까지 자동 생성</li>
+                                <li>다운로드 후 바로 실행 가능</li>
+                                <li>React/TypeScript 코드 품질 우수</li>
+                                <li>UI/UX 디자인도 함께 제안</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h4>⚠️ 한계</h4>
+                            <ul>
+                                <li>백엔드 코드는 상대적으로 약함</li>
+                                <li>복잡한 로직은 추가 수정 필요</li>
+                                <li>데이터베이스 설계는 직접 해야 함</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="use-case">
+                        <strong>💡 추천 사용법:</strong> 
+                        프로젝트 시작 단계에서 전체 프론트엔드 구조를 잡을 때 사용하세요! 
+                        "React로 이커머스 프론트엔드 만들어줘" 라고 요청하면 
+                        완성도 높은 초기 프로젝트를 받을 수 있습니다.
+                    </div>
+                </div>
+
+                <!-- Claude -->
+                <div class="ai-tool">
+                    <div class="ai-tool-header">
+                        <span class="ai-tool-icon">🧠</span>
+                        <div class="ai-tool-title">
+                            <h3>Claude (Anthropic)</h3>
+                            <p class="tech">백엔드 개발 최적화 | 컨텍스트 기억 능력 탁월</p>
+                        </div>
+                        <div class="rating">⭐⭐⭐⭐⭐</div>
+                    </div>
+
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h4>✅ 장점</h4>
+                            <ul>
+                                <li>Python/FastAPI 백엔드 코드 품질 최고</li>
+                                <li>이전 대화 내용을 정확하게 기억</li>
+                                <li>코드를 복사 붙여넣기만 해도 대부분 작동</li>
+                                <li>프로젝트 규모가 커져도 일관성 유지</li>
+                                <li>오류 해결 능력이 탁월함</li>
+                                <li>긴 코드도 한 번에 잘 생성</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h4>⚠️ 한계</h4>
+                            <ul>
+                                <li>토큰 제한 (무료: 하루 몇 번 사용 가능)</li>
+                                <li>간단한 질문도 토큰 소모</li>
+                                <li>복잡한 프로젝트는 토큰이 빨리 소진</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="use-case">
+                        <strong>💡 추천 사용법:</strong> 
+                        백엔드 API 개발, DB 모델링, 복잡한 비즈니스 로직 구현에 최적화되어 있습니다.
+                        기존 코드를 보여주고 "이 기능 추가해줘" 라고 하면 프로젝트 구조를 유지하면서
+                        완벽하게 통합된 코드를 제공합니다. <span class="highlight">메인 개발 도구로 추천!</span>
+                    </div>
+                </div>
+
+                <!-- ChatGPT -->
+                <div class="ai-tool">
+                    <div class="ai-tool-header">
+                        <span class="ai-tool-icon">💬</span>
+                        <div class="ai-tool-title">
+                            <h3>ChatGPT</h3>
+                            <p class="tech">빠른 질의응답 | 개념 설명 | 간단한 코드</p>
+                        </div>
+                        <div class="rating">⭐⭐⭐</div>
+                    </div>
+
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h4>✅ 장점</h4>
+                            <ul>
+                                <li>간단한 질문에 빠른 답변</li>
+                                <li>개념 설명이 쉽고 명확함</li>
+                                <li>토큰 제한이 상대적으로 느슨함</li>
+                                <li>일반적인 코드는 무난하게 생성</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h4>⚠️ 한계</h4>
+                            <ul>
+                                <li>전체 대화 맥락을 잘 기억 못함</li>
+                                <li>같은 질문에 다른 답변을 자주 함</li>
+                                <li>복잡한 프로젝트에 적용하기 어려움</li>
+                                <li>코드 품질이 Claude보다 떨어짐</li>
+                                <li>배경 지식 없이 적용하면 오류 많음</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="use-case">
+                        <strong>💡 추천 사용법:</strong> 
+                        "REST API가 뭐야?", "async/await 설명해줘", "이 에러 메시지 뜻이 뭐야?" 같은
+                        <span class="highlight">간단하고 일반적인 질문</span>에 적합합니다.
+                        Claude의 토큰을 아끼기 위해 기초 개념을 물어볼 때 사용하세요!
+                    </div>
+                </div>
+            </div>
+
+            <!-- 비교 테이블 -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="icon">⚖️</span>
+                    AI 도구 비교표
+                </h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>기준</th>
+                            <th>Google AI Studio</th>
+                            <th>Claude</th>
+                            <th>ChatGPT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>프론트엔드</strong></td>
+                            <td>⭐⭐⭐⭐⭐</td>
+                            <td>⭐⭐⭐⭐</td>
+                            <td>⭐⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td><strong>백엔드</strong></td>
+                            <td>⭐⭐⭐</td>
+                            <td>⭐⭐⭐⭐⭐</td>
+                            <td>⭐⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td><strong>코드 품질</strong></td>
+                            <td>⭐⭐⭐⭐</td>
+                            <td>⭐⭐⭐⭐⭐</td>
+                            <td>⭐⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td><strong>맥락 기억</strong></td>
+                            <td>⭐⭐⭐⭐</td>
+                            <td>⭐⭐⭐⭐⭐</td>
+                            <td>⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td><strong>사용 제한</strong></td>
+                            <td>보통</td>
+                            <td>엄격 (토큰 제한)</td>
+                            <td>느슨</td>
+                        </tr>
+                        <tr>
+                            <td><strong>복붙 적용성</strong></td>
+                            <td>⭐⭐⭐⭐</td>
+                            <td>⭐⭐⭐⭐⭐</td>
+                            <td>⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td><strong>추천 용도</strong></td>
+                            <td>초기 FE 세팅</td>
+                            <td>메인 개발</td>
+                            <td>빠른 질문</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 개발 워크플로우 -->
+            <div class="workflow">
+                <h3>🔄 실전 개발 워크플로우</h3>
+                <div class="workflow-steps">
+                    <div class="workflow-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Google AI Studio로 시작</h4>
+                            <p>"React + TypeScript로 이커머스 프론트엔드 만들어줘" → 프로젝트 구조 다운로드</p>
+                        </div>
+                    </div>
+
+                    <div class="workflow-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Claude로 백엔드 개발</h4>
+                            <p>"FastAPI로 상품 CRUD API 만들어줘" → 코드 복사 & 붙여넣기</p>
+                        </div>
+                    </div>
+
+                    <div class="workflow-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>ChatGPT로 개념 확인</h4>
+                            <p>"JWT 인증이 뭐야?", "async/await 사용법" 같은 간단한 질문</p>
+                        </div>
+                    </div>
+
+                    <div class="workflow-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Claude로 기능 추가</h4>
+                            <p>기존 코드 전체를 보여주고 "장바구니 기능 추가해줘" → 일관된 코드 생성</p>
+                        </div>
+                    </div>
+
+                    <div class="workflow-step">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <h4>오류 발생 시</h4>
+                            <p>오류 메시지 or 화면 캡처 → Claude에게 보여주기 → 즉시 해결책 받기</p>
+                        </div>
+                    </div>
+
+                    <div class="workflow-step">
+                        <div class="step-number">6</div>
+                        <div class="step-content">
+                            <h4>반복 & 완성</h4>
+                            <p>2~5단계 반복하면서 프로젝트 완성 → 배포!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 실전 팁 -->
+            <div class="tips">
+                <h3>💡 실전 꿀팁 모음</h3>
+
+                <div class="tip-item">
+                    <h4>🎯 Tip 1: 오류는 클립보드에!</h4>
+                    <p>
+                        에러 메시지가 길어도 전체를 복사해서 Claude에게 보여주세요. 
+                        화면 캡처도 좋지만, 텍스트로 복사하면 Claude가 더 정확하게 분석합니다.
+                        <strong>"이 오류 해결해줘"</strong> 한 마디면 대부분 해결됩니다!
+                    </p>
+                </div>
+
+                <div class="tip-item">
+                    <h4>🔄 Tip 2: Claude에게 맥락을 계속 제공하세요</h4>
+                    <p>
+                        "이전에 만든 products.py에 카테고리 기능 추가해줘" 처럼 
+                        이전 대화를 언급하면 Claude가 프로젝트 구조를 기억하고 
+                        <strong>완벽하게 통합된 코드</strong>를 제공합니다.
+                    </p>
+                </div>
+
+                <div class="tip-item">
+                    <h4>💾 Tip 3: 코드는 바로바로 저장</h4>
+                    <p>
+                        AI가 생성한 코드는 대화가 끝나면 다시 못 찾을 수 있어요. 
+                        받자마자 파일로 저장하고, Git에 커밋하는 습관을 들이세요!
+                    </p>
+                </div>
+
+                <div class="tip-item">
+                    <h4>🎨 Tip 4: 구체적으로 요청하기</h4>
+                    <p>
+                        "예쁜 UI 만들어줘" (❌) → "Tailwind CSS로 파란색 계열의 현대적인 카드 UI 만들어줘" (✅)
+                        <br>구체적일수록 원하는 결과가 나옵니다!
+                    </p>
+                </div>
+
+                <div class="tip-item">
+                    <h4>🔧 Tip 5: 단계별로 진행</h4>
+                    <p>
+                        처음부터 "전체 이커머스 사이트 만들어줘" 하면 복잡합니다. 
+                        <strong>로그인 → 상품 목록 → 장바구니 → 주문</strong> 순서로 
+                        하나씩 완성하면서 진행하세요!
+                    </p>
+                </div>
+
+                <div class="tip-item">
+                    <h4>🚀 Tip 6: ChatGPT로 토큰 아끼기</h4>
+                    <p>
+                        "API가 뭐야?", "이 용어 설명해줘" 같은 간단한 개념은 ChatGPT에게 물어보세요. 
+                        Claude의 소중한 토큰은 <strong>실제 코드 작성</strong>에 사용하세요!
+                    </p>
+                </div>
+            </div>
+
+            <!-- 실제 사례 -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="icon">📚</span>
+                    실제 문제 해결 사례
+                </h2>
+
+                <div class="ai-tool">
+                    <h3 style="color: #dc2626; margin-bottom: 15px;">🔴 문제: Render DB가 90일 후 삭제된다!</h3>
+                    <div class="code-block">
+# Claude에게 물어봄:
+"Render 무료 버전 DB가 90일 후 삭제된대. 
+영구 무료 DB 서비스 추천해줘"
+
+# Claude의 답변:
+"Neon이 좋습니다. PostgreSQL 0.5GB 영구 무료이고
+Render 백엔드는 그대로 두고 DB만 Neon으로 옮기면 됩니다.
+환경변수 DATABASE_URL만 바꾸면 끝!"
+
+# 결과: 10분 만에 해결! ✅
+                    </div>
+                </div>
+
+                <div class="ai-tool">
+                    <h3 style="color: #dc2626; margin-bottom: 15px;">🔴 문제: 이미지 업로드가 안 돼!</h3>
+                    <div class="code-block">
+# Claude에게 물어봄:
+"이미지 업로드하면 다음 배포 때 사라져요"
+
+# Claude의 답변:
+"Render는 ephemeral 파일시스템이라 재배포 시 파일이 사라집니다.
+Cloudinary CDN을 사용하세요. Python 코드 드릴게요!"
+
+# 코드 받아서 복붙 → 30분 만에 해결! ✅
+                    </div>
+                </div>
+
+                <div class="ai-tool">
+                    <h3 style="color: #dc2626; margin-bottom: 15px;">🔴 문제: 모바일에서 메뉴가 잘려!</h3>
+                    <div class="code-block">
+# Claude에게 물어봄:
+"모바일에서 네비바 메뉴가 다 안 보여요.
+햄버거 메뉴 만들어줄래요?"
+
+# Claude의 답변:
+"반응형 햄버거 메뉴 Navbar.tsx 드릴게요!
+Tailwind CSS로 md breakpoint 적용했습니다."
+
+# 코드 받아서 교체 → 완성! ✅
+                    </div>
+                </div>
+            </div>
+
+            <!-- 최종 요약 -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="icon">✨</span>
+                    핵심 요약
+                </h2>
+
+                <div class="ai-tool">
+                    <h3 style="margin-bottom: 20px;">🎯 AI 도구 활용 전략</h3>
+                    <ul style="line-height: 2; color: #4b5563;">
+                        <li>✅ <strong>Google AI Studio:</strong> 프로젝트 초기 세팅, 프론트엔드 구조</li>
+                        <li>✅ <strong>Claude:</strong> 메인 개발 도구 (백엔드, 복잡한 로직, 오류 해결)</li>
+                        <li>✅ <strong>ChatGPT:</strong> 간단한 개념 질문, 토큰 절약용</li>
+                        <li>✅ <strong>오류 해결:</strong> 에러 메시지 복사 → Claude에게 던지기</li>
+                        <li>✅ <strong>코드 적용:</strong> Claude 코드는 대부분 복붙으로 작동</li>
+                        <li>✅ <strong>단계별 진행:</strong> 한 번에 하나씩, 차근차근</li>
+                    </ul>
+                </div>
+
+                <div class="use-case" style="margin-top: 20px;">
+                    <strong>💎 최종 결론:</strong><br>
+                    프론트엔드/백엔드/DB 개념만 알아도, AI를 적재적소에 활용하면 
+                    <span class="highlight">완전한 풀스택 프로젝트 개발 & 배포가 가능</span>합니다! 
+                    두려워하지 말고 시작하세요! 🚀
+                </div>
+            </div>
+        </div>
+
+        <!-- 푸터 -->
+        <div class="footer">
+            <p style="font-size: 18px; color: #1f2937; font-weight: 600; margin-bottom: 15px;">
+                🎓 여러분도 할 수 있습니다!
+            </p>
+            <p>
+                이 가이드가 도움이 되셨나요? 실전 프로젝트를 시작해보세요!
+            </p>
+            <div class="links">
+                <a href="https://tshirts-shop.vercel.app" target="_blank">🌐 Live Demo</a>
+                <a href="https://github.com/coingjune/thsirts" target="_blank">💻 GitHub</a>
+            </div>
+            <p style="margin-top: 30px; font-size: 14px;">
+                📧 Questions? jubornin96@gmail.com
+            </p>
+        </div>
+    </div>
+</body>
+</html>
