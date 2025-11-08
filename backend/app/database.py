@@ -24,7 +24,6 @@ else:
         poolclass=NullPool,  # Serverless에 적합
         connect_args={
             "connect_timeout": 30,  # 연결 타임아웃 30초
-            "options": "-c statement_timeout=30000"  # 쿼리 타임아웃 30초
         }
     )
 
