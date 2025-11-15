@@ -48,8 +48,13 @@ const App: React.FC = () => {
 
     useEffect(() => {
         const handleHashChange = () => {
-            setRoute(window.location.hash.substr(1) || 'home');
+            const hash = window.location.hash.substring(1) || 'home'; // substr 대신 substring 사용
+            console.log('Hash changed to:', hash); // 디버깅용
+            setRoute(hash);
         };
+
+        // 초기 로드 시 route 설정
+        handleHashChange();
 
         window.addEventListener('hashchange', handleHashChange);
         
