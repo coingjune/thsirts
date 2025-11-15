@@ -36,6 +36,7 @@
     "noProducts": "No products available.",
     "seller": "Seller: {{name}}",
     "previous": "Previous",
+    "products.searchPlaceholder":"Search by product name or seller name...",
     "next": "Next"
   },
   "productDetail": {
