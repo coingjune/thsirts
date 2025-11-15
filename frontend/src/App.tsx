@@ -184,7 +184,8 @@ const App: React.FC = () => {
 
     const renderPage = () => {
         if (route.startsWith('product/')) {
-            const productId = route.split('/')[1];
+            const parts = route.split('/');
+            const productId = parts[1] || '';  // product/ 다음의 ID
             return <ProductDetailPage productId={productId} setRoute={setRoute} onCartUpdate={fetchCartCount} />;
         }
         switch (route) {
