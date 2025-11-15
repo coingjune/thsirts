@@ -1,48 +1,81 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-interface ProductDetailPageProps {
-    productId: string;
+interface ProductsPageProps {
     setRoute: (route: string) => void;
-    onCartUpdate: () => void;
 }
 
 interface Product {
     id: number;
     name: string;
     price: string;
-    description: string;
     image_url: string;
     category_main: string;
     category_sub?: string;
-    seller?: { id: number; name: string };
-    images?: Array<{ image_url: string; display_order: number }>;
+    seller?: { name: string };
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+const ITEMS_PER_PAGE = 12;
 
-const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId, setRoute, onCartUpdate }) => {
+const ProductsPage: React.FC<ProductsPageProps> = ({ setRoute }) => {
     const { t } = useTranslation();
-    const [product, setProduct] = useState<Product | null>(null);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
-    const [isAddingToCart, setIsAddingToCart] = useState(false);
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [selectedMainCategory, setSelectedMainCategory] = useState('전체');
+    const [selectedSubCategory, setSelectedSubCategory] = useState('전체');
+    const [searchQuery, setSearchQuery] = useState('');
     const [categories, setCategories] = useState<Record<string, string[]>>({});
-    const [showSubCategories, setShowSubCategories] = useState(false);
-    const [isHoveringImage, setIsHoveringImage] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
-        fetchProduct();
+        fetchProducts();
         fetchCategories();
-    }, [productId]);
 
-    const fetchProduct = async () => {
+        const savedState = sessionStorage.getItem('productsPageState');
+        if (savedState) {
+            const { category, subCategory, search, page } = JSON.parse(savedState);
+            setSelectedMainCategory(category);
+            setSelectedSubCategory(subCategory);
+            setSearchQuery(search);
+            setCurrentPage(page);
+            sessionStorage.removeItem('productsPageState');
+        }
+    }, []);
+
+    useEffect(() => {
+        let filtered = products;
+
+        if (selectedMainCategory !== '전체') {
+            filtered = filtered.filter(p => p.category_main === selectedMainCategory);
+            if (selectedSubCategory !== '전체') {
+                filtered = filtered.filter(p => p.category_sub === selectedSubCategory);
+            }
+        }
+
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            filtered = filtered.filter(p =>
+                p.name.toLowerCase().includes(query) ||
+                p.seller?.name.toLowerCase().includes(query)
+            );
+        }
+
+        setFilteredProducts(filtered);
+        setCurrentPage(1);
+    }, [products, selectedMainCategory, selectedSubCategory, searchQuery]);
+
+    const fetchProducts = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/products/${productId}`);
-            if (!response.ok) throw new Error(t('productDetail.notFound'));
+            const response = await fetch(`${API_BASE_URL}/api/products`);
+            if (!response.ok) {
+                throw new Error(t('common.error'));
+            }
             const data = await response.json();
-            setProduct(data);
+            setProducts(data);
+            setFilteredProducts(data);
         } catch (err) {
             setError(err instanceof Error ? err.message : t('common.error'));
         } finally {
@@ -62,101 +95,56 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId, setRou
         }
     };
 
-    const getProductImages = () => {
-        if (!product) return [];
-        if (product.images && product.images.length > 0) {
-            return product.images
-                .sort((a, b) => a.display_order - b.display_order)
-                .map(img => img.image_url);
-        }
-        return [product.image_url];
+    const handleMainCategoryChange = (category: string) => {
+        setSelectedMainCategory(category);
+        setSelectedSubCategory('전체');
     };
 
-    const addToCart = async () => {
-        const token = sessionStorage.getItem('access_token');
-        if (!token) {
-            alert(t('productDetail.loginRequired'));
-            return;
-        }
-
-        setIsAddingToCart(true);
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/cart`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    product_id: product?.id,
-                    quantity: 1
-                })
-            });
-
-            if (!response.ok) throw new Error(t('common.error'));
-            
-            alert(t('productDetail.addedToCart'));
-            onCartUpdate();
-        } catch (err) {
-            alert(err instanceof Error ? err.message : t('common.error'));
-        } finally {
-            setIsAddingToCart(false);
-        }
-    };
-
-    const buyNow = async () => {
-        await addToCart();
-        setRoute('cart');
-        window.location.hash = 'cart';
-    };
-
-    const goBackToProducts = () => {
-        setRoute('products');
-        window.location.hash = 'products';
-    };
-
-    const goToProductsWithCategory = (mainCategory: string, subCategory?: string) => {
+    const saveStateAndNavigate = (productId: number) => {
         sessionStorage.setItem('productsPageState', JSON.stringify({
-            category: mainCategory,
-            subCategory: subCategory || '전체',
-            search: '',
-            page: 1
+            category: selectedMainCategory,
+            subCategory: selectedSubCategory,
+            search: searchQuery,
+            page: currentPage
         }));
-        setRoute('products');
-        window.location.hash = 'products';
+        setRoute(`product/${productId}`);
     };
 
     const getCategoryName = (key: string) => {
         return t(`categories.${key}`, { defaultValue: key });
     };
 
+    const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const currentProducts = filteredProducts.slice(startIndex, endIndex);
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center min-h-screen">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">{t('productDetail.loading')}</p>
+                    <p className="mt-4 text-gray-600">{t('products.loading')}</p>
                 </div>
             </div>
         );
     }
 
-    if (error || !product) {
+    if (error) {
         return (
-            <div className="text-center py-20">
-                <h2 className="text-2xl font-bold">{error || t('productDetail.notFound')}</h2>
-                <a 
-                    href="#products" 
-                    onClick={(e) => { e.preventDefault(); setRoute('products'); }} 
-                    className="text-indigo-600 hover:text-indigo-800 mt-4 inline-block"
-                >
-                    &larr; {t('products.title')}
-                </a>
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="text-center">
+                    <p className="text-red-600 text-lg">{error}</p>
+                    <button 
+                        onClick={fetchProducts}
+                        className="mt-4 bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700"
+                    >
+                        {t('common.confirm')}
+                    </button>
+                </div>
             </div>
         );
     }
-
-    const productImages = getProductImages();
 
     return (
         <div className="bg-white">
@@ -164,23 +152,21 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId, setRou
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex overflow-x-auto py-3 space-x-4 scrollbar-hide">
                         <button
-                            onClick={goBackToProducts}
-                            className="px-4 py-2 rounded-full whitespace-nowrap font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                            onClick={() => handleMainCategoryChange('전체')}
+                            className={`px-4 py-2 rounded-full whitespace-nowrap font-medium transition-colors ${
+                                selectedMainCategory === '전체'
+                                    ? 'bg-indigo-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
                         >
                             {t('products.all')}
                         </button>
                         {Object.keys(categories).map((category) => (
                             <button
                                 key={category}
-                                onClick={() => {
-                                    if (product.category_main === category && categories[category]?.length > 0) {
-                                        setShowSubCategories(!showSubCategories);
-                                    } else {
-                                        goToProductsWithCategory(category);
-                                    }
-                                }}
+                                onClick={() => handleMainCategoryChange(category)}
                                 className={`px-4 py-2 rounded-full whitespace-nowrap font-medium transition-colors ${
-                                    product.category_main === category
+                                    selectedMainCategory === category
                                         ? 'bg-indigo-600 text-white'
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                 }`}
@@ -190,20 +176,24 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId, setRou
                         ))}
                     </div>
 
-                    {showSubCategories && categories[product.category_main]?.length > 0 && (
+                    {selectedMainCategory !== '전체' && categories[selectedMainCategory]?.length > 0 && (
                         <div className="flex overflow-x-auto py-3 space-x-2 border-t scrollbar-hide">
                             <button
-                                onClick={() => goToProductsWithCategory(product.category_main)}
-                                className="px-3 py-1 rounded-full text-sm whitespace-nowrap text-gray-600 hover:bg-gray-100 transition-colors"
+                                onClick={() => setSelectedSubCategory('전체')}
+                                className={`px-3 py-1 rounded-full text-sm whitespace-nowrap transition-colors ${
+                                    selectedSubCategory === '전체'
+                                        ? 'bg-indigo-100 text-indigo-700 font-medium'
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                }`}
                             >
                                 {t('products.all')}
                             </button>
-                            {categories[product.category_main].map((subCategory) => (
+                            {categories[selectedMainCategory].map((subCategory) => (
                                 <button
                                     key={subCategory}
-                                    onClick={() => goToProductsWithCategory(product.category_main, subCategory)}
+                                    onClick={() => setSelectedSubCategory(subCategory)}
                                     className={`px-3 py-1 rounded-full text-sm whitespace-nowrap transition-colors ${
-                                        product.category_sub === subCategory
+                                        selectedSubCategory === subCategory
                                             ? 'bg-indigo-100 text-indigo-700 font-medium'
                                             : 'text-gray-600 hover:bg-gray-100'
                                     }`}
@@ -216,119 +206,116 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId, setRou
                 </div>
             </div>
 
-            <div className="max-w-4xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
-                <div className="lg:grid lg:grid-cols-2 lg:gap-x-8 lg:items-start">
-                    <div>
-                        <div 
-                            className="relative w-full bg-gray-100 rounded-lg overflow-hidden mb-4"
-                            style={{ aspectRatio: '1/1' }}
-                            onMouseEnter={() => setIsHoveringImage(true)}
-                            onMouseLeave={() => setIsHoveringImage(false)}
-                        >
-                            <img 
-                                src={productImages[currentImageIndex]?.startsWith('http') 
-                                    ? productImages[currentImageIndex]
-                                    : `${API_BASE_URL}${productImages[currentImageIndex]}`}
-                                alt={product.name}
-                                className="w-full h-full object-contain"
-                            />
-
-                            {productImages.length > 1 && isHoveringImage && (
-                                <>
-                                    <button
-                                        onClick={() => setCurrentImageIndex(prev => prev === 0 ? productImages.length - 1 : prev - 1)}
-                                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg"
-                                    >
-                                        ←
-                                    </button>
-                                    <button
-                                        onClick={() => setCurrentImageIndex(prev => prev === productImages.length - 1 ? 0 : prev + 1)}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg"
-                                    >
-                                        →
-                                    </button>
-                                </>
-                            )}
-                        </div>
-
-                        {productImages.length > 1 && (
-                            <div className="grid grid-cols-5 gap-2">
-                                {productImages.map((imgUrl, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => setCurrentImageIndex(index)}
-                                        className={`border-2 rounded-lg overflow-hidden ${
-                                            currentImageIndex === index 
-                                                ? 'border-indigo-600 ring-2 ring-indigo-600' 
-                                                : 'border-transparent hover:border-gray-400'
-                                        }`}
-                                        style={{ aspectRatio: '1/1' }}
-                                    >
-                                        <img 
-                                            src={imgUrl.startsWith('http') ? imgUrl : `${API_BASE_URL}${imgUrl}`}
-                                            alt={`${product.name} ${index + 1}`}
-                                            className="w-full h-full object-contain"
-                                        />
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+            <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+                <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 text-center mb-8">
+                    {t('products.title')}
+                </h2>
+                
+                <div className="mb-8 max-w-md mx-auto">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder={t('products.searchPlaceholder') || '상품명 또는 판매자명으로 검색...'}
+                            className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                        <svg className="absolute left-4 top-3.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
                     </div>
-
-                    <div className="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0">
-                        <a 
-                            href="#products" 
-                            onClick={(e) => { e.preventDefault(); goBackToProducts(); }} 
-                            className="text-sm font-medium text-indigo-600 hover:text-indigo-500 mb-4 inline-block"
-                        >
-                           &larr; {t('products.title')}
-                        </a>
-
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className="text-xs px-3 py-1 bg-gray-100 text-gray-700 rounded-full font-medium">
-                                {getCategoryName(product.category_main)}
+                    <div className="mt-2 text-sm text-gray-600">
+                        {selectedMainCategory !== '전체' && (
+                            <span className="mr-2">
+                                📁 {getCategoryName(selectedMainCategory)}
+                                {selectedSubCategory !== '전체' && ` > ${getCategoryName(selectedSubCategory)}`}
                             </span>
-                            {product.category_sub && (
-                                <span className="text-xs px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full font-medium">
-                                    {getCategoryName(product.category_sub)}
-                                </span>
-                            )}
-                        </div>
-
-                        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">{product.name}</h1>
-                        {product.seller && (
-                            <p className="mt-2 text-sm text-gray-600">
-                                {t('productDetail.seller')}: <span className="font-medium text-gray-900">{product.seller.name}</span>
-                            </p>
                         )}
-                        <div className="mt-3">
-                            <p className="text-3xl text-gray-900">{product.price}</p>
-                        </div>
-                        <div className="mt-6">
-                            <div className="text-base text-gray-700 space-y-6">
-                                <p>{product.description}</p>
-                            </div>
-                        </div>
-                        <div className="mt-10 flex space-x-4">
-                            <button 
-                                onClick={addToCart}
-                                disabled={isAddingToCart}
-                                className="flex-1 bg-white border-2 border-indigo-600 rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-indigo-600 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:border-indigo-400 disabled:text-indigo-400"
-                            >
-                                {isAddingToCart ? t('productDetail.adding') : t('productDetail.addToCart')}
-                            </button>
-                            <button 
-                                onClick={buyNow}
-                                className="flex-1 bg-indigo-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                            >
-                                {t('productDetail.buyNow')}
-                            </button>
-                        </div>
+                        <span>{filteredProducts.length}개</span>
                     </div>
                 </div>
+
+                {currentProducts.length === 0 ? (
+                    <div className="text-center py-12">
+                        <p className="text-gray-600">{t('products.noProducts')}</p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="grid grid-cols-1 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 xl:gap-x-8">
+                            {currentProducts.map((product) => (
+                                <div
+                                    key={product.id}
+                                    onClick={() => saveStateAndNavigate(product.id)}
+                                    className="group cursor-pointer"
+                                >
+                                    <div className="w-full bg-gray-200 rounded-lg overflow-hidden" style={{ aspectRatio: '3/4' }}>
+                                        <img 
+                                            src={product.image_url.startsWith('http') ? product.image_url : `${API_BASE_URL}${product.image_url}`}
+                                            alt={product.name} 
+                                            className="w-full h-full object-cover group-hover:opacity-75 transition-opacity duration-300" 
+                                        />
+                                    </div>
+                                    <div className="mt-2 flex items-center gap-2">
+                                        <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
+                                            {getCategoryName(product.category_main)}
+                                        </span>
+                                        {product.category_sub && (
+                                            <span className="text-xs px-2 py-1 bg-indigo-50 text-indigo-600 rounded">
+                                                {getCategoryName(product.category_sub)}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <h3 className="mt-2 text-sm text-gray-700">{product.name}</h3>
+                                    <p className="mt-1 text-lg font-medium text-gray-900">{product.price}</p>
+                                    {product.seller && (
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            {t('products.seller', { name: product.seller.name })}
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        {totalPages > 1 && (
+                            <div className="mt-12 flex justify-center items-center gap-2">
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                    disabled={currentPage === 1}
+                                    className="px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {t('products.previous')}
+                                </button>
+                                
+                                <div className="flex gap-2">
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page)}
+                                            className={`px-4 py-2 border rounded-md ${
+                                                currentPage === page
+                                                    ? 'bg-indigo-600 text-white'
+                                                    : 'hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {t('products.next')}
+                                </button>
+                            </div>
+                        )}
+                    </>
+                )}
             </div>
         </div>
     );
 };
 
-export default ProductDetailPage;
+export default ProductsPage;
