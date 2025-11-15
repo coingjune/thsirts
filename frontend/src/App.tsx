@@ -188,13 +188,9 @@ const App: React.FC = () => {
     };
 
     const renderPage = () => {
-        if (route.startsWith('product/')) {
-            const parts = route.split('/');
-            const productId = parts[1] || '';  // product/ 다음의 ID
-            return <ProductDetailPage productId={productId} setRoute={setRoute} onCartUpdate={fetchCartCount} />;
-        }
+        // 정확한 매칭을 위해 순서 변경
         switch (route) {
-            case 'products':
+            case 'products':  // ← 먼저 체크!
                 return <ProductsPage setRoute={setRoute} />;
             case 'cart':
                 return <CartPage setRoute={setRoute} onCartUpdate={fetchCartCount} />;
@@ -207,7 +203,13 @@ const App: React.FC = () => {
             case 'mypage':
                 return <MyPage setRoute={setRoute} currentUser={currentUser} refreshUser={refreshUser}/>;
             case 'home':
+                return <HomePage setRoute={setRoute} />;
             default:
+                // product/123 같은 동적 라우트
+                if (route.startsWith('product/')) {
+                    const productId = route.split('/')[1];
+                    return <ProductDetailPage productId={productId} setRoute={setRoute} onCartUpdate={fetchCartCount} />;
+                }
                 return <HomePage setRoute={setRoute} />;
         }
     };
