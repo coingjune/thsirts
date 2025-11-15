@@ -36,7 +36,7 @@
     "noProducts": "상품이 없습니다.",
     "seller": "판매자: {{name}}",
     "previous": "이전",
-    "products.searchPlaceholder":"상품명 또는 판매자명으로 검색...",
+    "searchPlaceholder":"상품명 또는 판매자명으로 검색...",
     "next": "다음"
   },
   "productDetail": {
