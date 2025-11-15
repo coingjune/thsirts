@@ -26,7 +26,6 @@ const App: React.FC = () => {
     const [authModalType, setAuthModalType] = useState<'login' | 'signup'>('login');
     const [cartItemCount, setCartItemCount] = useState(0);
 
-    // ✅ App.tsx 최상단 함수 내부에 추가
     const refreshUser = async () => {
         const token = sessionStorage.getItem('access_token');
         if (!token) return;
@@ -54,7 +53,6 @@ const App: React.FC = () => {
 
         window.addEventListener('hashchange', handleHashChange);
         
-        // 페이지 로드 시 저장된 토큰으로 사용자 정보 가져오기
         const token = sessionStorage.getItem('access_token');
         if (token) {
             fetchCurrentUser(token);
@@ -63,7 +61,6 @@ const App: React.FC = () => {
         return () => window.removeEventListener('hashchange', handleHashChange);
     }, []);
 
-    // 사용자 로그인 상태가 변경되면 장바구니 개수 조회
     useEffect(() => {
         if (currentUser) {
             fetchCartCount();
@@ -104,7 +101,6 @@ const App: React.FC = () => {
                 const data = await response.json();
                 setCurrentUser(data);
             } else {
-                // 토큰이 유효하지 않으면 삭제
                 sessionStorage.removeItem('access_token');
             }
         } catch (error) {
@@ -133,10 +129,7 @@ const App: React.FC = () => {
 
             const data = await response.json();
             
-            // 토큰 저장
             sessionStorage.setItem('access_token', data.access_token);
-            
-            // 사용자 정보 설정
             setCurrentUser(data.user);
             setAuthModalOpen(false);
         } catch (error) {
@@ -167,10 +160,7 @@ const App: React.FC = () => {
 
             const data = await response.json();
             
-            // 토큰 저장
             sessionStorage.setItem('access_token', data.access_token);
-            
-            // 사용자 정보 설정
             setCurrentUser(data.user);
             setAuthModalOpen(false);
         } catch (error) {
@@ -181,7 +171,6 @@ const App: React.FC = () => {
     };
 
     const handleLogout = () => {
-        // 토큰 삭제
         sessionStorage.removeItem('access_token');
         setCurrentUser(null);
         setRoute('home');
