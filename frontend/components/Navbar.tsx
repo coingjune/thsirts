@@ -40,7 +40,7 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                             onClick={(e) => handleNavigation(e, 'home')} 
                             className="text-2xl font-bold text-gray-900 tracking-tight"
                         >
-                            Seoul:soum
+                            POV SEOUL
                         </a>
                     </div>
 

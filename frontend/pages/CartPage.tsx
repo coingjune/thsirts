@@ -73,7 +73,7 @@ const CartPage: React.FC<CartPageProps> = ({ setRoute, onCartUpdate }) => {
 
             // 로컬 상태 업데이트
             setCartItems(cartItems.filter(item => item.id !== itemId));
-            setSelectedItems(selectedItems.filter(id => id !== itemId));
+            //setSelectedItems(selectedItems.filter(id => id !== itemId));
             // 부모 컴포넌트에 업데이트 알림
             if (onCartUpdate) {
                 onCartUpdate();
