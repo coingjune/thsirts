@@ -180,6 +180,36 @@ const App: React.FC = () => {
         }
     };
 
+    const handleGoogleLogin = async (token: string) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Google login failed');
+            }
+
+            const data = await response.json();
+            
+            // 토큰 저장
+            sessionStorage.setItem('access_token', data.access_token);
+            
+            // 사용자 정보 설정
+            setCurrentUser(data.user);
+            setAuthModalOpen(false);
+        } catch (error) {
+            console.error('Google login error:', error);
+            alert(error instanceof Error ? error.message : 'Google login failed');
+            throw error;
+        }
+    };
+
     const handleLogout = () => {
         // 토큰 삭제
         sessionStorage.removeItem('access_token');
@@ -237,6 +267,7 @@ const App: React.FC = () => {
                     onLogin={handleLogin}
                     onSignup={handleSignup}
                     switchType={(newType) => setAuthModalType(newType)}
+                    onGoogleLogin={handleGoogleLogin}
                 />
             )}
         </div>

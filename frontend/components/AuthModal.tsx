@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User } from '../App';
 
 interface AuthModalProps {
@@ -7,9 +7,10 @@ interface AuthModalProps {
     onLogin: (user: User & { password: string }) => Promise<void>;
     onSignup: (user: User & { password: string }) => Promise<void>;
     switchType: (type: 'login' | 'signup') => void;
+    onGoogleLogin?: (token: string) => Promise<void>;
 }
 
-const AuthModal: React.FC<AuthModalProps> = ({ type, onClose, onLogin, onSignup, switchType }) => {
+const AuthModal: React.FC<AuthModalProps> = ({ type, onClose, onLogin, onSignup, switchType, onGoogleLogin }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -17,6 +18,74 @@ const AuthModal: React.FC<AuthModalProps> = ({ type, onClose, onLogin, onSignup,
     const [error, setError] = useState('');
 
     const isLogin = type === 'login';
+
+    // Google OAuth 초기화
+    useEffect(() => {
+        // Google Identity Services 스크립트 로드
+        if (typeof window !== 'undefined' && !(window as any).google) {
+            const script = document.createElement('script');
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.async = true;
+            script.defer = true;
+            script.onload = () => {
+                // 스크립트 로드 후 버튼 렌더링
+                if ((window as any).google && onGoogleLogin) {
+                    (window as any).google.accounts.id.initialize({
+                        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
+                        callback: async (response: any) => {
+                            if (response.credential && onGoogleLogin) {
+                                setIsLoading(true);
+                                try {
+                                    await onGoogleLogin(response.credential);
+                                } catch (err) {
+                                    setError('구글 로그인에 실패했습니다.');
+                                    setIsLoading(false);
+                                }
+                            }
+                        },
+                    });
+                    
+                    // 버튼 렌더링
+                    const buttonElement = document.getElementById('google-signin-button');
+                    if (buttonElement) {
+                        (window as any).google.accounts.id.renderButton(buttonElement, {
+                            theme: 'outline',
+                            size: 'large',
+                            width: '100%',
+                            text: isLogin ? 'signin_with' : 'signup_with',
+                        });
+                    }
+                }
+            };
+            document.head.appendChild(script);
+        } else if ((window as any).google && onGoogleLogin) {
+            // 이미 로드된 경우
+            (window as any).google.accounts.id.initialize({
+                client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
+                callback: async (response: any) => {
+                    if (response.credential && onGoogleLogin) {
+                        setIsLoading(true);
+                        try {
+                            await onGoogleLogin(response.credential);
+                        } catch (err) {
+                            setError('구글 로그인에 실패했습니다.');
+                            setIsLoading(false);
+                        }
+                    }
+                },
+            });
+            
+            const buttonElement = document.getElementById('google-signin-button');
+            if (buttonElement) {
+                (window as any).google.accounts.id.renderButton(buttonElement, {
+                    theme: 'outline',
+                    size: 'large',
+                    width: '100%',
+                    text: isLogin ? 'signin_with' : 'signup_with',
+                });
+            }
+        }
+    }, [isLogin, onGoogleLogin]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -73,6 +142,21 @@ const AuthModal: React.FC<AuthModalProps> = ({ type, onClose, onLogin, onSignup,
                         ) : (isLogin ? '로그인' : '회원가입')}
                     </button>
                 </form>
+                
+                {/* 구분선 */}
+                <div className="mt-6 mb-6 flex items-center">
+                    <div className="flex-1 border-t border-gray-300"></div>
+                    <span className="px-4 text-sm text-gray-500">또는</span>
+                    <div className="flex-1 border-t border-gray-300"></div>
+                </div>
+                
+                {/* 구글 로그인 버튼 */}
+                {onGoogleLogin && import.meta.env.VITE_GOOGLE_CLIENT_ID && (
+                    <div className="mb-6">
+                        <div id="google-signin-button" className="w-full"></div>
+                    </div>
+                )}
+                
                 <p className="mt-6 text-center text-sm text-gray-600">
                     {isLogin ? '계정이 없으신가요?' : '이미 계정이 있으신가요?'}
                     <button onClick={() => switchType(isLogin ? 'signup' : 'login')} className="font-medium text-indigo-600 hover:text-indigo-500 ml-1">

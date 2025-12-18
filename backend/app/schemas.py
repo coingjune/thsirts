@@ -13,6 +13,10 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+# 구글 OAuth 토큰 요청
+class GoogleToken(BaseModel):
+    token: str
+
 # 사용자 응답 (비밀번호 제외)
 class UserResponse(BaseModel):
     name: str

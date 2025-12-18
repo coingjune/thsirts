@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, Dict
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
@@ -9,6 +9,8 @@ from .database import get_db
 from . import models
 import os
 from dotenv import load_dotenv
+from google.auth.transport import requests
+from google.oauth2 import id_token
 
 load_dotenv()
 
@@ -77,3 +79,39 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+# 구글 OAuth 토큰 검증
+async def verify_google_token(token: str) -> Optional[Dict]:
+    """구글 ID 토큰을 검증하고 사용자 정보를 반환"""
+    try:
+        # 구글 클라이언트 ID (환경변수에서 가져오기)
+        GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+        
+        if not GOOGLE_CLIENT_ID:
+            # 클라이언트 ID가 없으면 토큰만 디코딩 (개발용)
+            # 실제 운영에서는 반드시 GOOGLE_CLIENT_ID를 설정해야 합니다
+            try:
+                from jose import jwt as jose_jwt
+                decoded_token = jose_jwt.decode(token, options={"verify_signature": False})
+                return decoded_token
+            except Exception:
+                # jose로 디코딩 실패 시 None 반환
+                return None
+        
+        # 구글 토큰 검증
+        idinfo = id_token.verify_oauth2_token(
+            token, requests.Request(), GOOGLE_CLIENT_ID
+        )
+        
+        # 토큰 발급자 확인
+        if idinfo.get('iss') not in ['accounts.google.com', 'https://accounts.google.com']:
+            raise ValueError('Wrong issuer.')
+        
+        return idinfo
+    except ValueError as e:
+        # 토큰 검증 실패
+        print(f"Google token verification failed: {e}")
+        return None
+    except Exception as e:
+        print(f"Error verifying Google token: {e}")
+        return None

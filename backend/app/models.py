@@ -10,7 +10,8 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
+    hashed_password = Column(String, nullable=True)  # 구글 로그인 사용자는 비밀번호 없음
+    google_id = Column(String, nullable=True, unique=True, index=True)  # 구글 사용자 ID
     is_seller = Column(Integer, default=0)  # 0: 일반 사용자, 1: 판매자
     created_at = Column(DateTime, default=datetime.utcnow)
     
