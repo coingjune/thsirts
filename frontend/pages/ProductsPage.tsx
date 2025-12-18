@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Product {
     id: number;
@@ -36,6 +37,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ setRoute }) => {
     const [selectedMainCategory, setSelectedMainCategory] = useState<string>('전체');
     const [selectedSubCategory, setSelectedSubCategory] = useState<string>('전체');
     const [currentPage, setCurrentPage] = useState(1);
+    const { t } = useTranslation();
 
     useEffect(() => {
         fetchProducts();
@@ -78,13 +80,13 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ setRoute }) => {
         try {
             const response = await fetch(`${API_BASE_URL}/api/products`);
             if (!response.ok) {
-                throw new Error('상품을 불러오는데 실패했습니다.');
+                throw new Error(t('products.errorLoadFailed', '상품을 불러오는데 실패했습니다.'));
             }
             const data = await response.json();
             setProducts(data);
             setFilteredProducts(data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : '오류가 발생했습니다.');
+            setError(err instanceof Error ? err.message : t('common.errorUnknown', '오류가 발생했습니다.'));
         } finally {
             setIsLoading(false);
         }
@@ -127,7 +129,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ setRoute }) => {
             <div className="flex justify-center items-center min-h-screen">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">상품을 불러오는 중...</p>
+                    <p className="mt-4 text-gray-600">{t('products.loading', '상품을 불러오는 중...')}</p>
                 </div>
             </div>
         );
@@ -142,7 +144,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ setRoute }) => {
                         onClick={fetchProducts}
                         className="mt-4 bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700"
                     >
-                        다시 시도
+                        {t('common.retry', '다시 시도')}
                     </button>
                 </div>
             </div>
@@ -210,7 +212,9 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ setRoute }) => {
             </div>
 
             <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-                <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 text-center mb-8">우리의 컬렉션</h2>
+                <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 text-center mb-8">
+                    {t('products.title', '우리의 컬렉션')}
+                </h2>
                 
                 <div className="mb-8 max-w-md mx-auto">
                     <div className="relative">
@@ -218,7 +222,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ setRoute }) => {
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="상품명 또는 판매자명으로 검색..."
+                            placeholder={t('products.searchPlaceholder', '상품명 또는 판매자명으로 검색...')}
                             className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                         />
                         <svg className="absolute left-4 top-3.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -232,13 +236,17 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ setRoute }) => {
                                 {selectedSubCategory !== '전체' && ` > ${selectedSubCategory}`}
                             </span>
                         )}
-                        <span>검색 결과: {filteredProducts.length}개</span>
+                        <span>
+                            {t('products.searchResult', { count: filteredProducts.length, defaultValue: '검색 결과: {{count}}개' })}
+                        </span>
                     </div>
                 </div>
 
                 {currentProducts.length === 0 ? (
                     <div className="text-center py-12">
-                        <p className="text-gray-600">검색 결과가 없습니다.</p>
+                        <p className="text-gray-600">
+                            {t('products.emptyResult', '검색 결과가 없습니다.')}
+                        </p>
                     </div>
                 ) : (
                     <>
@@ -282,7 +290,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ setRoute }) => {
                                     disabled={currentPage === 1}
                                     className="px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    이전
+                                    {t('common.prev', '이전')}
                                 </button>
                                 
                                 <div className="flex gap-2">
@@ -306,7 +314,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ setRoute }) => {
                                     disabled={currentPage === totalPages}
                                     className="px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    다음
+                                    {t('common.next', '다음')}
                                 </button>
                             </div>
                         )}

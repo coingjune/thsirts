@@ -25,6 +25,20 @@ const resources = {
         subtitle: 'Find Your Seoul.',
         cta: '지금 쇼핑하기',
       },
+      products: {
+        title: '우리의 컬렉션',
+        loading: '상품을 불러오는 중...',
+        errorLoadFailed: '상품을 불러오는데 실패했습니다.',
+        searchPlaceholder: '상품명 또는 판매자명으로 검색...',
+        searchResult: '검색 결과: {{count}}개',
+        emptyResult: '검색 결과가 없습니다.',
+      },
+      common: {
+        retry: '다시 시도',
+        prev: '이전',
+        next: '다음',
+        errorUnknown: '오류가 발생했습니다.',
+      },
       auth: {
         titleLogin: '로그인',
         titleSignup: '회원가입',
@@ -63,6 +77,20 @@ const resources = {
         title: 'POV SEOUL',
         subtitle: 'Find Your Seoul.',
         cta: 'Shop Now',
+      },
+      products: {
+        title: 'Our Collection',
+        loading: 'Loading products...',
+        errorLoadFailed: 'Failed to load products.',
+        searchPlaceholder: 'Search by product or seller...',
+        searchResult: 'Results: {{count}} items',
+        emptyResult: 'No products found.',
+      },
+      common: {
+        retry: 'Retry',
+        prev: 'Prev',
+        next: 'Next',
+        errorUnknown: 'An unexpected error occurred.',
       },
       auth: {
         titleLogin: 'Log In',
