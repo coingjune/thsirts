@@ -9,6 +9,7 @@ interface Product {
     seller_id: number;
     category_main: string;
     category_sub?: string;
+    external_store_url?: string;
     images?: Array<{
         id: number;
         image_url: string;
@@ -125,16 +126,12 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId, setRou
 
         if (!product) return;
 
-        const orderItem = {
-            id: Date.now(),
-            product_id: product.id,
-            quantity: 1,
-            product: product
-        };
-
-        sessionStorage.setItem('orderItems', JSON.stringify([orderItem]));
-        setRoute('order');
-        window.location.hash = 'order';
+        if (product.external_store_url) {
+            // 판매자가 등록한 외부 스토어 링크로 바로 이동
+            window.open(product.external_store_url, '_blank');
+        } else {
+            alert('이 상품에는 외부 스토어 링크가 설정되지 않았습니다.\n판매자에게 문의해주세요.');
+        }
     };
 
     const goBackToProducts = () => {

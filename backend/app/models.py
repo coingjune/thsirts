@@ -57,6 +57,9 @@ class Product(Base):
     seller_id = Column(Integer, ForeignKey("sellers.id"), nullable=False)
     category_main = Column(String, nullable=False, default="미분류")  # 대분류
     category_sub = Column(String, nullable=True)  # 소분류
+    # 외부 스토어 링크 (예: 스마트스토어, 11번가 등)
+    # - API 레벨에서는 필수로 받되, 기존 데이터 호환을 위해 DB에서는 nullable 허용
+    external_store_url = Column(String, nullable=True)
     is_active = Column(Integer, default=1)  # 추가: 1=활성, 0=비활성
     created_at = Column(DateTime, default=datetime.utcnow)
     

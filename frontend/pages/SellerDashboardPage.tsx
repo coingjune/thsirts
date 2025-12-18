@@ -6,6 +6,7 @@ interface Product {
     price: string;
     description: string;
     image_url: string;
+    external_store_url?: string;
     category_main: string;
     category_sub?: string;
     is_active: number;
@@ -66,6 +67,7 @@ const SellerDashboardPage: React.FC<SellerDashboardPageProps> = ({ setRoute }) =
     const [productName, setProductName] = useState('');
     const [price, setPrice] = useState('');
     const [description, setDescription] = useState('');
+    const [externalStoreUrl, setExternalStoreUrl] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [imageFiles, setImageFiles] = useState<File[]>([]);
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -154,8 +156,8 @@ const SellerDashboardPage: React.FC<SellerDashboardPageProps> = ({ setRoute }) =
 
     const handleAddOrEditProduct = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!productName || !price || !description || !categoryMain) {
-            alert('모든 필드를 입력해주세요.');
+        if (!productName || !price || !description || !categoryMain || !externalStoreUrl) {
+            alert('모든 필드를 입력해주세요. (외부 스토어 링크 포함)');
             return;
         }
 
@@ -180,6 +182,7 @@ const SellerDashboardPage: React.FC<SellerDashboardPageProps> = ({ setRoute }) =
             if (categorySub) {
                 formData.append('category_sub', categorySub);
             }
+            formData.append('external_store_url', externalStoreUrl);
             
             if (editingProduct) {
                 // 수정 모드: 슬롯 순서대로 처리
@@ -288,6 +291,7 @@ const SellerDashboardPage: React.FC<SellerDashboardPageProps> = ({ setRoute }) =
         setPrice(product.price);
         setDescription(product.description);
         setImageUrl(product.image_url);
+        setExternalStoreUrl(product.external_store_url || '');
         
         // ✅ 기존 이미지들을 미리보기로 표시
         if (product.images && product.images.length > 0) {
@@ -313,6 +317,7 @@ const SellerDashboardPage: React.FC<SellerDashboardPageProps> = ({ setRoute }) =
         setPrice(product.price);
         setDescription(product.description);
         setImageUrl(product.image_url);
+        setExternalStoreUrl(product.external_store_url || '');
         
         // ✅ 기존 이미지들을 미리보기로 표시
         if (product.images && product.images.length > 0) {
@@ -370,6 +375,7 @@ const SellerDashboardPage: React.FC<SellerDashboardPageProps> = ({ setRoute }) =
         setProductName('');
         setPrice('');
         setDescription('');
+        setExternalStoreUrl('');
         setImageUrl('');
         setImageFiles([]);
         setImagePreviews([]);
@@ -549,6 +555,23 @@ const SellerDashboardPage: React.FC<SellerDashboardPageProps> = ({ setRoute }) =
                                             placeholder="상품 설명을 입력하세요"
                                             required
                                         />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            외부 스토어 링크(URL) <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="url"
+                                            value={externalStoreUrl}
+                                            onChange={(e) => setExternalStoreUrl(e.target.value)}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                            placeholder="예: https://smartstore.naver.com/your-shop/products/12345"
+                                            required
+                                        />
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            구매자가 &quot;바로 주문&quot; 버튼을 눌렀을 때 이동할 외부 스토어 상품 페이지 링크를 입력하세요.
+                                        </p>
                                     </div>
 
                                     <div>

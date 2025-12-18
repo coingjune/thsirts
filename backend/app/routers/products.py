@@ -59,6 +59,7 @@ async def create_product(
     description: str = Form(...),
     category_main: str = Form("미분류"),
     category_sub: Optional[str] = Form(None),
+    external_store_url: str = Form(...),
     images: List[UploadFile] = File(...),
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -113,6 +114,7 @@ async def create_product(
         seller_id=seller.id,
         category_main=category_main,
         category_sub=category_sub,
+        external_store_url=external_store_url,
         is_active=1
     )
     db.add(new_product)
@@ -139,6 +141,7 @@ async def update_product(
     description: str = Form(...),
     category_main: str = Form("미분류"),
     category_sub: Optional[str] = Form(None),
+    external_store_url: str = Form(...),
     images: Optional[List[UploadFile]] = File(None),
     slot_info: Optional[str] = Form(None),
     current_user: models.User = Depends(get_current_user),
@@ -228,6 +231,7 @@ async def update_product(
     existing_product.description = description
     existing_product.category_main = category_main
     existing_product.category_sub = category_sub
+    existing_product.external_store_url = external_store_url
     existing_product.is_active = 1
     
     db.commit()

@@ -67,6 +67,7 @@ class ProductCreate(BaseModel):
     image_url: str
     category_main: Optional[str] = "미분류"
     category_sub: Optional[str] = None
+    external_store_url: str
     #seller_id: int
 
 # 상품 응답
@@ -79,6 +80,7 @@ class ProductResponse(BaseModel):
     seller_id: int
     category_main: Optional[str] = "미분류"
     category_sub: Optional[str] = None
+    external_store_url: Optional[str] = None
     is_active: int
     images: List[ProductImageResponse] = []  # 추가
     seller: Optional[SellerResponse] = None
