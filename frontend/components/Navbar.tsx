@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface User {
     name: string;
@@ -16,6 +17,12 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAuthModal, cartItemCount = 0 }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const { t, i18n } = useTranslation();
+
+    const toggleLanguage = () => {
+        const next = i18n.language === 'ko' ? 'en' : 'ko';
+        i18n.changeLanguage(next);
+    };
 
     const handleNavigation = (e: React.MouseEvent, route: string) => {
         e.preventDefault();
@@ -40,7 +47,7 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                             onClick={(e) => handleNavigation(e, 'home')} 
                             className="text-2xl font-bold text-gray-900 tracking-tight"
                         >
-                            POV SEOUL
+                            {t('brand')}
                         </a>
                     </div>
 
@@ -51,14 +58,14 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                             onClick={(e) => handleNavigation(e, 'home')} 
                             className="text-gray-600 hover:bg-gray-200 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                         >
-                            메인
+                            {t('nav.home')}
                         </a>
                         <a 
                             href="#products" 
                             onClick={(e) => handleNavigation(e, 'products')} 
                             className="text-gray-600 hover:bg-gray-200 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                         >
-                            제품
+                            {t('nav.products')}
                         </a>
                         {currentUser && (
                             <a 
@@ -66,7 +73,7 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                                 onClick={(e) => handleNavigation(e, 'mypage')} 
                                 className="text-gray-600 hover:bg-gray-200 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                             >
-                                마이페이지
+                                {t('nav.mypage')}
                             </a>
                         )}
 
@@ -74,13 +81,13 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                         {currentUser ? (
                             <>
                                 <span className="text-sm text-gray-700 hidden lg:block">
-                                    안녕하세요, {currentUser.name}님!
+                                    {t('nav.greeting', { name: currentUser.name })}
                                 </span>
                                 <button 
                                     onClick={handleLogout} 
                                     className="text-gray-600 hover:bg-gray-200 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                                 >
-                                    로그아웃
+                                    {t('nav.logout', '로그아웃')}
                                 </button>
                             </>
                         ) : (
@@ -89,16 +96,25 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                                     onClick={() => openAuthModal('login')} 
                                     className="text-gray-600 hover:bg-gray-200 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                                 >
-                                    로그인
+                                    {t('nav.login')}
                                 </button>
                                 <button 
                                     onClick={() => openAuthModal('signup')} 
                                     className="bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-2 rounded-md text-sm font-medium"
                                 >
-                                    회원가입
+                                    {t('nav.signup')}
                                 </button>
                             </>
                         )}
+
+                        {/* 언어 전환 토글 */}
+                        <button
+                            onClick={toggleLanguage}
+                            className="px-3 py-1 border border-gray-300 rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100"
+                            aria-label="Change language"
+                        >
+                            {i18n.language === 'ko' ? 'EN' : 'KO'}
+                        </button>
 
                         {/* 장바구니 아이콘 */}
                         {currentUser && (
@@ -121,8 +137,17 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
 
                     {/* 모바일 햄버거 버튼 + 장바구니 */}
                     <div className="md:hidden flex items-center space-x-2">
+                        {/* 모바일 언어 전환 토글 */}
+                        <button
+                            onClick={toggleLanguage}
+                            className="px-2 py-1 border border-gray-300 rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100"
+                            aria-label="Change language"
+                        >
+                            {i18n.language === 'ko' ? 'EN' : 'KO'}
+                        </button>
+
                         {/* 모바일 장바구니 아이콘 */}
-                        {currentUser && (
+                                        {currentUser && (
                             <button 
                                 onClick={(e) => handleNavigation(e, 'cart')}
                                 className="relative p-2 text-gray-600 hover:text-gray-900"
@@ -169,7 +194,7 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                         {/* 사용자 정보 (로그인 시) */}
                         {currentUser && (
                             <div className="px-3 py-2 text-sm text-gray-700 border-b border-gray-200 mb-2">
-                                안녕하세요, <span className="font-semibold">{currentUser.name}</span>님!
+                                {t('nav.greeting', { name: currentUser.name })}
                             </div>
                         )}
 
@@ -179,14 +204,14 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                             onClick={(e) => handleNavigation(e, 'home')}
                             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                         >
-                            메인
+                            {t('nav.home')}
                         </a>
                         <a
                             href="#products"
                             onClick={(e) => handleNavigation(e, 'products')}
                             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                         >
-                            제품
+                            {t('nav.products')}
                         </a>
 
                         {currentUser ? (
@@ -196,14 +221,14 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                                     onClick={(e) => handleNavigation(e, 'mypage')}
                                     className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                                 >
-                                    👤 마이페이지
+                                    👤 {t('nav.mypage')}
                                 </a>
                                 <a
                                     href="#cart"
                                     onClick={(e) => handleNavigation(e, 'cart')}
                                     className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                                 >
-                                    장바구니 {cartItemCount > 0 && (
+                                    {t('nav.cart')} {cartItemCount > 0 && (
                                         <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full ml-2">
                                             {cartItemCount}
                                         </span>
@@ -213,7 +238,7 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                                     onClick={handleLogout}
                                     className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                                 >
-                                    로그아웃
+                                    {t('nav.logout', '로그아웃')}
                                 </button>
                             </>
                         ) : (
@@ -225,7 +250,7 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                                     }}
                                     className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                                 >
-                                    로그인
+                                    {t('nav.login')}
                                 </button>
                                 <button
                                     onClick={() => {
@@ -234,7 +259,7 @@ const Navbar: React.FC<NavbarProps> = ({ setRoute, currentUser, onLogout, openAu
                                     }}
                                     className="block w-full text-left px-3 py-2 rounded-md text-base font-medium bg-indigo-600 text-white hover:bg-indigo-700"
                                 >
-                                    회원가입
+                                    {t('nav.signup')}
                                 </button>
                             </>
                         )}
