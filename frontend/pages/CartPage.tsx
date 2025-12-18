@@ -9,6 +9,7 @@ interface CartItem {
         name: string;
         price: string;
         image_url: string;
+        external_store_url?: string;
     };
 }
 
@@ -23,18 +24,10 @@ const CartPage: React.FC<CartPageProps> = ({ setRoute, onCartUpdate }) => {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
-    const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
     useEffect(() => {
         fetchCart();
     }, []);
-
-    useEffect(() => {
-        // 장바구니 아이템이 로드되면 모두 선택
-        if (cartItems.length > 0) {
-            setSelectedItems(cartItems.map(item => item.id));
-        }
-    }, [cartItems]);
 
     const fetchCart = async () => {
         try {
@@ -115,35 +108,20 @@ const CartPage: React.FC<CartPageProps> = ({ setRoute, onCartUpdate }) => {
         }
     };
 
-    const toggleSelectItem = (itemId: number) => {
-        setSelectedItems(prev => 
-            prev.includes(itemId) 
-                ? prev.filter(id => id !== itemId)
-                : [...prev, itemId]
-        );
-    };
-
-    const toggleSelectAll = () => {
-        if (selectedItems.length === cartItems.length) {
-            setSelectedItems([]);
-        } else {
-            setSelectedItems(cartItems.map(item => item.id));
-        }
-    };
-
-    const handleOrder = () => {
-        if (selectedItems.length === 0) {
-            alert('주문할 상품을 선택해주세요.');
+    const handleOrderItem = (item: CartItem) => {
+        const token = sessionStorage.getItem('access_token');
+        if (!token) {
+            alert('로그인이 필요합니다.');
             return;
         }
-        
-        // 선택된 아이템 정보를 sessionStorage에 저장
-        const selectedCartItems = cartItems.filter(item => selectedItems.includes(item.id));
-        sessionStorage.setItem('orderItems', JSON.stringify(selectedCartItems));
-        
-        // 주문 페이지로 이동
-        setRoute('order');
-        window.location.hash = 'order';
+
+        if (!item.product.external_store_url) {
+            alert('이 상품에는 외부 스토어 링크가 설정되지 않았습니다.\n판매자에게 문의해주세요.');
+            return;
+        }
+
+        // 각 상품별 외부 스토어 링크로 바로 이동
+        window.open(item.product.external_store_url, '_blank');
     };
 
     if (isLoading) {
@@ -191,29 +169,9 @@ const CartPage: React.FC<CartPageProps> = ({ setRoute, onCartUpdate }) => {
         <div className="bg-white min-h-screen">
             <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
                 <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 mb-8">장바구니</h1>
-                
-                {/* 전체 선택 */}
-                <div className="mb-4 flex items-center">
-                    <input
-                        type="checkbox"
-                        checked={selectedItems.length === cartItems.length && cartItems.length > 0}
-                        onChange={toggleSelectAll}
-                        className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500"
-                    />
-                    <label className="ml-2 text-sm font-medium text-gray-700">
-                        전체 선택 ({selectedItems.length}/{cartItems.length})
-                    </label>
-                </div>
-
                 <div className="space-y-4">
                     {cartItems.map((item) => (
                         <div key={item.id} className="flex items-center gap-4 bg-gray-50 p-4 rounded-lg">
-                            <input
-                                type="checkbox"
-                                checked={selectedItems.includes(item.id)}
-                                onChange={() => toggleSelectItem(item.id)}
-                                className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500"
-                            />
                             <img 
                                 src={item.product.image_url.startsWith('http') 
                                     ? item.product.image_url 
@@ -226,44 +184,47 @@ const CartPage: React.FC<CartPageProps> = ({ setRoute, onCartUpdate }) => {
                                 <h3 className="text-lg font-medium text-gray-900">{item.product.name}</h3>
                                 <p className="text-gray-600">{item.product.price}</p>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                    className="w-8 h-8 rounded-md bg-gray-200 hover:bg-gray-300 flex items-center justify-center"
-                                >
-                                    -
-                                </button>
-                                <span className="w-12 text-center font-medium">{item.quantity}</span>
-                                <button
-                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                    className="w-8 h-8 rounded-md bg-gray-200 hover:bg-gray-300 flex items-center justify-center"
-                                >
-                                    +
-                                </button>
+                            <div className="flex flex-col items-end gap-2">
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                        className="w-8 h-8 rounded-md bg-gray-200 hover:bg-gray-300 flex items-center justify-center"
+                                    >
+                                        -
+                                    </button>
+                                    <span className="w-12 text-center font-medium">{item.quantity}</span>
+                                    <button
+                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                        className="w-8 h-8 rounded-md bg-gray-200 hover:bg-gray-300 flex items-center justify-center"
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleOrderItem(item)}
+                                        className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 text-sm font-medium"
+                                    >
+                                        주문하기
+                                    </button>
+                                    <button
+                                        onClick={() => removeFromCart(item.id)}
+                                        className="text-red-600 hover:text-red-800 px-4 py-2 text-sm"
+                                    >
+                                        삭제
+                                    </button>
+                                </div>
                             </div>
-                            <button
-                                onClick={() => removeFromCart(item.id)}
-                                className="text-red-600 hover:text-red-800 px-4 py-2"
-                            >
-                                삭제
-                            </button>
                         </div>
                     ))}
                 </div>
 
-                <div className="mt-8 flex justify-between items-center">
+                <div className="mt-8 flex justify-start items-center">
                     <button
                         onClick={() => setRoute('products')}
                         className="text-indigo-600 hover:text-indigo-800"
                     >
                         ← 쇼핑 계속하기
-                    </button>
-                    <button 
-                        onClick={handleOrder}
-                        disabled={selectedItems.length === 0}
-                        className="bg-indigo-600 text-white px-8 py-3 rounded-md hover:bg-indigo-700 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
-                    >
-                        선택 상품 주문하기 ({selectedItems.length}개)
                     </button>
                 </div>
             </div>
